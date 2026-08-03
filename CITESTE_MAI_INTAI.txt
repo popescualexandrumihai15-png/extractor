@@ -1,0 +1,35 @@
+════════════════════════════════════════
+  EXTRACTOR POZE — Instrucțiuni
+════════════════════════════════════════
+
+── Ce face aplicația ──────────────────
+• Încarci un fișier .txt cu numele pozelor (câte un nume pe rând)
+• Selectezi folderul unde se află pozele originale
+• Selectezi folderul unde vrei să fie copiate
+• Bifezi pozele dorite din listă
+• Apeși "Copiază pozele selectate"
+
+── Cum obții .exe ─────────────────────
+1. Asigură-te că ai Python instalat:
+   https://www.python.org/downloads/
+   (bifează "Add Python to PATH" la instalare!)
+
+2. Dublu-click pe:  COMPILEAZA_EXE.bat
+
+3. Aștepți ~1 minut. Se creează folderul "dist\"
+
+4. Găsești  dist\ExtractorPoze.exe  — acesta e aplicația ta!
+   Poți muta fișierul .exe oriunde pe calculator.
+
+── Format fișier listă (.txt) ─────────
+Fiecare rând = un nume de fișier exact, inclusiv extensia. Exemplu:
+
+  IMG_0042.jpg
+  foto_vacanta_2024.png
+  DSC_1234.JPG
+  poza_familie.jpeg
+
+── Notă ───────────────────────────────
+Căutarea numelui ignoră diferența majuscule/minuscule
+(ex: "img_001.JPG" găsește și "IMG_001.jpg").
+════════════════════════════════════════
