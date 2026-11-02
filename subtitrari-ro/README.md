@@ -92,6 +92,8 @@ Pluginurile se testează cap-coadă pe simulatoare, cu serverul real al aplicaț
 
 Pentru a valida fișierul FCPXML cu DTD-ul Apple, setează `FCPXML_DTD` cu calea către `FCPXMLv1_9.dtd` din Final Cut Pro și instalează `xmllint`.
 
+Pentru testul cu transcriere reală (vorbire sintetică în română, prin aplicație și prin ambele pluginuri), setează `SUBTITRARI_MODEL` cu folderul unui model faster-whisper descărcat și instalează `espeak-ng`.
+
 Structura codului:
 
 | Fișier | Rol |

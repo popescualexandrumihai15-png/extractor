@@ -7,7 +7,7 @@ name = "subtitrari-ro"
 version = "0.1.0"
 description = "Subtitrări automate în română, pe un singur rând, pentru clipuri video și editoare."
 requires-python = ">=3.10"
-dependencies = ["faster-whisper>=1.1", "customtkinter>=5.2", "pillow>=10"]
+dependencies = ["faster-whisper>=1.1", "numpy>=1.24", "customtkinter>=5.2", "pillow>=10"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

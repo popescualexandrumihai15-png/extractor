@@ -82,6 +82,44 @@ def _incarca_model(nume: str, forteaza_cpu: bool = False):
         return model
 
 
+def adauga_cuvant(cuvinte: list[Cuvant], text: str, start: float, end: float) -> None:
+    """Adaugă un cuvânt; lipește bucățile cu cratimă pe care Whisper le dă separat.
+
+    Whisper întoarce „Cluj” + „-Napoca” sau „Scrie” + „-ne” ca două cuvinte; în
+    română cratima leagă (s-a, într-o, l-am, Cluj-Napoca), deci le unim.
+    """
+    precedent = cuvinte[-1] if cuvinte else None
+    lipit = precedent is not None and start - precedent.end < 0.3 and (
+        (text.startswith("-") and len(text) > 1) or precedent.text.endswith("-")
+    )
+    if lipit:
+        precedent.text += text
+        precedent.end = end
+    else:
+        cuvinte.append(Cuvant(text, start, end))
+
+
+def citeste_wav(cale: str | Path):
+    """WAV-ul extras de aplicație (16 kHz, mono, 16 biți) ca numere float32, fără PyAV.
+
+    Altfel faster-whisper decodează fișierul cu PyAV, iar faster-whisper 1.2.1 cu
+    PyAV 19 eșuează („unexpected keyword argument 'metadata_errors'”). Pentru alte
+    formate întoarce calea, ca faster-whisper să le decodeze singur.
+    """
+    import wave
+
+    import numpy as np
+
+    try:
+        with wave.open(str(cale), "rb") as fisier:
+            if (fisier.getframerate(), fisier.getnchannels(), fisier.getsampwidth()) != (16000, 1, 2):
+                return str(cale)
+            date = fisier.readframes(fisier.getnframes())
+    except (wave.Error, OSError, EOFError):
+        return str(cale)
+    return np.frombuffer(date, dtype="<i2").astype(np.float32) / 32768.0
+
+
 def transcrie(
     cale_audio: str | Path,
     model: str = MODEL_IMPLICIT,
@@ -114,7 +152,7 @@ def transcrie(
         if stare:
             stare("Transcriu sunetul…")
         segmente, info = whisper.transcribe(
-            str(cale_audio),
+            citeste_wav(cale_audio),
             language=limba or None,
             task="transcribe",
             beam_size=5,
@@ -123,6 +161,8 @@ def transcrie(
             vad_parameters={"min_silence_duration_ms": 500},
             condition_on_previous_text=False,
             initial_prompt=prompt,
+            # Fără „hotwords”: în teste, cu ele modelul a sărit peste propoziția
+            # care conținea chiar termenii dați. Termenii stau doar în prompt.
             hallucination_silence_threshold=2.0,
         )
         durata = max(getattr(info, "duration", 0.0) or 0.0, 0.001)
@@ -138,7 +178,7 @@ def transcrie(
                     continue
                 start = max(float(w.start), cuvinte[-1].end if cuvinte else 0.0)
                 end = max(float(w.end), start + 0.05)
-                cuvinte.append(Cuvant(text, round(start, 3), round(end, 3)))
+                adauga_cuvant(cuvinte, text, round(start, 3), round(end, 3))
         if progres:
             progres(1.0)
         return cuvinte
