@@ -1,6 +1,11 @@
+import os
 import re
+import shutil
+import subprocess
 import xml.etree.ElementTree as ET
 from fractions import Fraction
+
+import pytest
 
 from subtitrari_ro import exporturi
 from subtitrari_ro.media import InfoVideo
@@ -106,3 +111,23 @@ def test_fcpxml_evidentiere_are_stil_separat():
 def test_scrie_srt_cu_bom(tmp_path):
     cale = exporturi.scrie("srt", _subtitrari(), Stil(), _info(), tmp_path / "x.srt")
     assert cale.read_bytes().startswith(b"\xef\xbb\xbf1\n")
+
+
+DTD_FCPXML = os.environ.get("FCPXML_DTD", "")
+
+
+@pytest.mark.skipif(not (DTD_FCPXML and os.path.isfile(DTD_FCPXML) and shutil.which("xmllint")),
+                    reason="setează FCPXML_DTD cu calea către FCPXMLv1_9.dtd (din Final Cut) și instalează xmllint")
+def test_fcpxml_trece_validarea_dtd_apple(tmp_path):
+    variante = {
+        "video": exporturi.fcpxml(_subtitrari(), Stil(), _info()),
+        "gap": exporturi.fcpxml(_subtitrari(), Stil(cutie=True), _info(are_video=False)),
+        "karaoke": exporturi.fcpxml(_subtitrari(), Stil(evidentiere=True, majuscule=True),
+                                    _info(Fraction(30000, 1001))),
+    }
+    for nume, text in variante.items():
+        cale = tmp_path / f"{nume}.fcpxml"
+        cale.write_text(text, encoding="utf-8")
+        rezultat = subprocess.run(["xmllint", "--noout", "--dtdvalid", DTD_FCPXML, str(cale)],
+                                  capture_output=True, text=True)
+        assert rezultat.returncode == 0, (nume, rezultat.stderr)

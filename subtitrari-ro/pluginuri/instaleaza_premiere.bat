@@ -13,7 +13,7 @@ if errorlevel 1 (
 )
 
 echo [2/2] Permit panourile nesemnate (PlayerDebugMode) ...
-for %%V in (9 10 11 12) do reg add "HKCU\Software\Adobe\CSXS.%%V" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul
+for %%V in (9 10 11 12 13 14) do reg add "HKCU\Software\Adobe\CSXS.%%V" /v PlayerDebugMode /t REG_SZ /d 1 /f >nul
 
 echo.
 echo Gata. Reporneste Premiere Pro, apoi deschide: Window ^> Extensions ^> Subtitrari RO

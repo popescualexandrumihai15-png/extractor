@@ -18,7 +18,7 @@ Resolve are nevoie de Python 3 instalat pentru scripturi (<https://www.python.or
 **Folosire:**
 
 1. Deschide timeline-ul.
-2. Alege Workspace → Scripts → Edit → **Subtitrari RO**.
+2. Alege Workspace → Scripts → **Subtitrari RO**. Scriptul apare în orice pagină.
 3. Așteaptă. Mesajele apar în Workspace → Console.
 
 Rezultatul:
@@ -28,14 +28,18 @@ Rezultatul:
 
 Dacă vrei doar unul dintre ele, deschide fișierul `Subtitrari RO.py` și schimbă `True` în `False` la `PUNE_SUBTITRARI_SRT` sau `PUNE_STRAT_STILIZAT`.
 
-## Premiere Pro (2021 sau mai nou)
+**Dacă ST1 are deja subtitrări:** Resolve pune subtitrările adăugate prin script după cele existente, nu la timpul lor. De aceea scriptul nu le adaugă pe un ST1 ocupat. Șterge subtitrările vechi de pe ST1 și rulează din nou scriptul. SRT-ul rămâne oricum în Media Pool.
+
+## Premiere Pro (2021–2026)
 
 **Instalare:**
 
 - Windows: dă dublu-clic pe `instaleaza_premiere.bat`.
 - macOS: dă dublu-clic pe `instaleaza_premiere_mac.command`.
 
-Scriptul copiază panoul și permite panourile nesemnate (setarea `PlayerDebugMode` de la Adobe). Repornește apoi Premiere Pro.
+Scriptul copiază panoul și permite panourile nesemnate (setarea `PlayerDebugMode` de la Adobe, inclusiv cheile CSXS 13 și 14 de care are nevoie Premiere 2026). Repornește apoi Premiere Pro.
+
+Panoul este de tip CEP. Adobe a anunțat că oprește panourile CEP peste câțiva ani, în favoarea UXP. Până atunci, panoul merge și în Premiere 2026.
 
 **Folosire:**
 
@@ -62,5 +66,5 @@ Final Cut nu permite pluginuri simple de acest tip. Exportă din aplicație și 
 
 CapCut nu are pluginuri pentru aplicații externe. Ai două variante:
 
-- **Subtitrări editabile:** importă fișierul `.srt` din meniul de subtitrări al CapCut. Numele meniului diferă de la o versiune la alta.
+- **Subtitrări editabile:** în CapCut Desktop, alege File → Import → Captions (sau butonul de import din panoul Captions) și selectează fișierul `.srt`. Numele meniului diferă puțin de la o versiune la alta. CapCut aplică subtitrărilor stilul lui. Poți schimba apoi fontul pentru toate odată.
 - **Cu fontul și stilul tău:** în aplicație bifează „MP4 cu subtitrări arse”, apoi folosește videoul rezultat în CapCut.

@@ -56,7 +56,7 @@ Dacă ai placă video NVIDIA, aplicația o folosește automat. Dacă nu o poate 
 | **DaVinci Resolve** | pluginul pune SRT-ul pe un track de subtitrări | pluginul pune și stratul transparent pe un track video |
 | **Premiere Pro** | pluginul creează un track de subtitrări | pluginul pune și stratul transparent pe un track video |
 | **Final Cut Pro** | File → Import → Captions → fișierul .srt | importă fișierul .fcpxml: proiect nou cu videoul și titluri cu fontul tău |
-| **CapCut** | importă fișierul .srt din meniul de subtitrări al CapCut (numele meniului diferă de la o versiune la alta) | exportă „MP4 cu subtitrări arse” |
+| **CapCut** | File → Import → Captions → fișierul .srt (numele meniului diferă puțin de la o versiune la alta) | exportă „MP4 cu subtitrări arse” |
 
 Stratul transparent (MOV, ProRes 4444 cu canal alfa) merge în orice editor care citește transparența. Pune-l pe un track video deasupra clipului, la începutul timeline-ului.
 
@@ -84,6 +84,13 @@ python -m subtitrari_ro server         # doar serverul pentru pluginuri, fără 
 pip install -r requirements-dev.txt
 python -m pytest
 ```
+
+Pluginurile se testează cap-coadă pe simulatoare, cu serverul real al aplicației:
+
+- `tests/emulatoare/resolve_fals.py` imită API-ul de scripting DaVinci Resolve, după documentația oficială;
+- `tests/emulatoare/premiere_fals.js` imită ExtendScript și puntea CEP din Premiere Pro (are nevoie de Node.js).
+
+Pentru a valida fișierul FCPXML cu DTD-ul Apple, setează `FCPXML_DTD` cu calea către `FCPXMLv1_9.dtd` din Final Cut Pro și instalează `xmllint`.
 
 Structura codului:
 

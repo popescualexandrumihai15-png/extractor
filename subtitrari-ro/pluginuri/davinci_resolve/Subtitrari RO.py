@@ -9,7 +9,7 @@ Ce face:
        fontul ales în aplicație, pus pe un track video nou, deasupra.
 
 Instalare: vezi pluginuri/README.md (sau rulează instaleaza_davinci.bat).
-Pornire: Workspace → Scripts → Edit → Subtitrari RO.
+Pornire: Workspace → Scripts → Subtitrari RO (din orice pagină).
 Mesajele apar în Workspace → Console.
 """
 
@@ -28,7 +28,11 @@ FPS_STANDARD = {23.976: "24000/1001", 29.97: "30000/1001", 59.94: "60000/1001", 
 
 
 def mesaj(text):
-    print("[Subtitrări RO] " + text)
+    linie = "[Subtitrări RO] " + text
+    try:
+        print(linie)
+    except UnicodeEncodeError:  # consola Windows fără UTF-8
+        print(linie.encode("ascii", "replace").decode("ascii"))
 
 
 def director_setari():
@@ -63,18 +67,21 @@ def cere(port, token, cale, date=None, timeout=10):
 
 
 def obtine_resolve():
-    for nume in ("resolve",):
-        if nume in globals():
-            return globals()[nume]
+    """Obiectul resolve: Resolve îl pune la dispoziție scripturilor din meniul Workspace."""
+    # Variabile pe care Resolve le definește pentru scripturi (globale sau builtins).
+    for expresie in ("resolve", "app.GetResolve()", "bmd.scriptapp('Resolve')"):
+        try:
+            obiect = eval(expresie)
+        except Exception:
+            continue
+        if obiect is not None:
+            return obiect
     try:
         import DaVinciResolveScript as dvr  # noqa: N813
 
         return dvr.scriptapp("Resolve")
-    except ImportError:
-        pass
-    if "bmd" in globals():
-        return globals()["bmd"].scriptapp("Resolve")
-    return None
+    except Exception:
+        return None
 
 
 def fps_timeline(timeline):
@@ -86,12 +93,19 @@ def fps_timeline(timeline):
     return valoare, str(int(round(valoare)))
 
 
-def intrare_sursa(item, fps):
+def intrare_sursa(item, mpi, fps):
     """Momentul din fișierul sursă de unde începe clipul (secunde)."""
     try:
-        valoare = item.GetSourceStartTime()  # Resolve 19+
-        if valoare is not None:
+        valoare = item.GetSourceStartTime()  # Resolve 19+, în secunde
+        if valoare is not None and float(valoare) >= 0:
             return float(valoare)
+    except Exception:
+        pass
+    try:
+        cadru = item.GetSourceStartFrame()  # în cadrele clipului sursă
+        fps_clip = float(str(mpi.GetClipProperty("FPS") or fps).split()[0])
+        if cadru is not None and fps_clip > 0:
+            return float(cadru) / fps_clip
     except Exception:
         pass
     try:
@@ -123,7 +137,7 @@ def clipuri_audio(timeline, fps):
                 "cale": cale,
                 "start": (item.GetStart() - start) / fps,
                 "durata": item.GetDuration() / fps,
-                "intrare": intrare_sursa(item, fps),
+                "intrare": intrare_sursa(item, mpi, fps),
             })
     return clipuri
 
@@ -189,8 +203,15 @@ def main():
 
     if PUNE_SUBTITRARI_SRT and fisiere.get("srt"):
         elemente = media_pool.ImportMedia([fisiere["srt"]]) or []
-        if elemente and media_pool.AppendToTimeline(elemente):
-            mesaj("Subtitrările sunt pe track-ul de subtitrări.")
+        # Resolve pune subtitrările adăugate prin script după cele existente pe ST1,
+        # nu la timpul lor. Le adăugăm doar dacă ST1 e gol, ca să nu iasă decalate.
+        ocupat = bool(timeline.GetTrackCount("subtitle")) and bool(timeline.GetItemListInTrack("subtitle", 1))
+        if elemente and not ocupat and media_pool.AppendToTimeline(elemente):
+            mesaj("Subtitrările sunt pe track-ul de subtitrări ST1.")
+        elif ocupat:
+            mesaj("Track-ul de subtitrări ST1 are deja subtitrări, iar Resolve le-ar pune pe cele noi "
+                  "după ele, decalate. Am importat SRT-ul în Media Pool (folderul „Subtitrări RO”). "
+                  "Șterge subtitrările vechi de pe ST1 și rulează din nou scriptul.")
         else:
             mesaj("Am importat SRT-ul în Media Pool (folderul „Subtitrări RO”). "
                   "Trage-l pe timeline, la început.")

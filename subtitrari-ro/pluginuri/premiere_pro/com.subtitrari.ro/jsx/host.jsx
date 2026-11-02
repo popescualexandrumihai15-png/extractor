@@ -137,7 +137,7 @@ function subtitrariImporta(caleSrt, caleMov) {
                 }
             }
             if (track) {
-                track.overwriteClip(mov, 0);
+                track.overwriteClip(mov, "0"); // timpul se dă în ticks, ca text
                 rezultat.push("Stratul stilizat e pe track-ul video de sus.");
             } else {
                 rezultat.push("Stratul stilizat e în bin-ul „" + NUME_BIN +
